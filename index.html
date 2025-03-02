@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,10 +15,6 @@
         h1 {
             color: #343a40;
         }
-        .btn-custom {
-            background-color: #007bff;
-            color: white;
-        }
         .table thead {
             background-color: #007bff;
             color: white;
@@ -31,125 +26,150 @@
 </head>
 <body>
 
-    <div class="container">
-        <h1 class="text-center">ZAGCRM Dashboard</h1>
-        <button class="btn btn-success mb-3" onclick="addLead()">+ Add New Lead</button>
-        
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Source</th>
-                    <th>Status</th>
-                    <th>Lead Score</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="leadTableBody">
-                <!-- Leads will be dynamically inserted here -->
-            </tbody>
-        </table>
+<div class="container">
+    <h1 class="text-center">ZAGCRM Dashboard</h1>
+    <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addLeadModal">+ Add New Lead</button>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Source</th>
+                <th>Status</th>
+                <th>Lead Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="leadTableBody"></tbody>
+    </table>
+</div>
+
+<!-- Add Lead Modal -->
+<div class="modal fade" id="addLeadModal" tabindex="-1" aria-labelledby="addLeadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLeadModalLabel">Add New Lead</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addLeadForm">
+                    <div class="mb-3">
+                        <label for="leadName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="leadName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="leadEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="leadEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="leadPhone" class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="leadPhone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="leadSource" class="form-label">Source</label>
+                        <input type="text" class="form-control" id="leadSource">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Lead</button>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        // Fetch Leads from Database
-        async function fetchLeads() {
-            try {
-                let response = await fetch('/api/leads');
-                let data = await response.json();
-                let tableBody = document.getElementById("leadTableBody");
-                tableBody.innerHTML = "";
+<script>
+    const API_URL = "https://sammyboi81.pythonanywhere.com/api/leads";
 
-                data.forEach(lead => {
-                    let row = `
-                        <tr>
-                            <td>${lead.id}</td>
-                            <td>${lead.name}</td>
-                            <td>${lead.email}</td>
-                            <td>${lead.phone}</td>
-                            <td>${lead.source}</td>
-                            <td>${lead.status}</td>
-                            <td>${lead.lead_score}</td>
-                            <td class="action-btns">
-                                <button class="btn btn-warning btn-sm" onclick="editLead(${lead.id})">Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteLead(${lead.id})">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-            } catch (error) {
-                console.error("Error fetching leads:", error);
-            }
-        }
-
-        // Function to Add New Lead (Placeholder)
-        function addLead() {
-            alert("Feature coming soon: Add new leads here!");
-        }
-
-        // Function to Edit Lead (Placeholder)
-        function editLead(id) {
-            alert("Feature coming soon: Edit lead " + id);
-        }
-
-        // Function to Delete Lead (Placeholder)
-        function deleteLead(id) {
-            alert("Feature coming soon: Delete lead " + id);
-        }
-
-        // Load leads on page load
-        window.onload = fetchLeads;
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    // Fetch Leads and Populate Table
     async function fetchLeads() {
         try {
-            let response = await fetch('https://sammyboi81.pythonanywhere.com/api/leads');
+            let response = await fetch(API_URL);
             let data = await response.json();
             let tableBody = document.getElementById("leadTableBody");
             tableBody.innerHTML = "";
 
             data.forEach(lead => {
-                let row = `
-                    <tr>
-                        <td>${lead.id}</td>
-                        <td>${lead.name}</td>
-                        <td>${lead.email}</td>
-                        <td>${lead.phone}</td>
-                        <td>${lead.source}</td>
-                        <td>${lead.status}</td>
-                        <td>${lead.lead_score}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editLead(${lead.id})">Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteLead(${lead.id})">Delete</button>
-                        </td>
-                    </tr>
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${lead.id}</td>
+                    <td>${lead.name}</td>
+                    <td>${lead.email}</td>
+                    <td>${lead.phone}</td>
+                    <td>${lead.source}</td>
+                    <td>${lead.status || "Pending"}</td>
+                    <td>${lead.lead_score || "N/A"}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editLead(${lead.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteLead(${lead.id})">Delete</button>
+                    </td>
                 `;
-                tableBody.innerHTML += row;
+                tableBody.appendChild(row);
             });
         } catch (error) {
             console.error("Error fetching leads:", error);
         }
     }
 
-    function addLead() {
-        alert("Feature coming soon: Add new leads here!");
-    }
+    // Add Lead Function
+    document.getElementById("addLeadForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
 
+        let name = document.getElementById("leadName").value;
+        let email = document.getElementById("leadEmail").value;
+        let phone = document.getElementById("leadPhone").value;
+        let source = document.getElementById("leadSource").value;
+
+        try {
+            let response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, phone, source, status: "New", lead_score: 0 })
+            });
+
+            if (response.ok) {
+                alert("Lead added successfully!");
+                document.getElementById("addLeadForm").reset();
+                fetchLeads();
+                new bootstrap.Modal(document.getElementById('addLeadModal')).hide();
+            } else {
+                alert("Failed to add lead.");
+            }
+        } catch (error) {
+            console.error("Error adding lead:", error);
+        }
+    });
+
+    // Edit Lead (Placeholder)
     function editLead(id) {
         alert("Feature coming soon: Edit lead " + id);
     }
 
-    function deleteLead(id) {
-        alert("Feature coming soon: Delete lead " + id);
+    // Delete Lead Function
+    async function deleteLead(id) {
+        if (confirm("Are you sure you want to delete this lead?")) {
+            try {
+                let response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+
+                if (response.ok) {
+                    alert("Lead deleted successfully!");
+                    fetchLeads();
+                } else {
+                    alert("Failed to delete lead.");
+                }
+            } catch (error) {
+                console.error("Error deleting lead:", error);
+            }
+        }
     }
 
+    // Load leads on page load
     window.onload = fetchLeads;
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
